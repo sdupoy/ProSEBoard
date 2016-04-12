@@ -1,5 +1,0 @@
-package fr.eseo.ld.proseboard.mybatis.mappers;
-
-public interface StatusUserMapper {
-	public void deleteBySessionId(Long idSession);
-}
