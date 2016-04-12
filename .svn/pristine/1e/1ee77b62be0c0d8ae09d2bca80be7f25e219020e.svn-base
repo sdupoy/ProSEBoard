@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.RedmineEventMapper">	
+	<resultMap type="RedmineEvent" id="RedmineEventResult">
+		<id property="id" column="id_event" />
+		<result property="subject" column="subject" />
+		<result property="description" column="description" />
+		<result property="startDate" column="start_date" />
+		<result property="closedDate" column="closed_on" />
+		<result property="trackerId" column="tacker_id" />
+		<result property="statusId" column="status_id" />
+	</resultMap>
+	
+	<select id="getAllForUser" parameterType="User" resultMap="RedmineEventResult">
+		SELECT * FROM issues
+		WHERE issues.assigned_to_id = #{idRedmine};
+	</select>
+</mapper>

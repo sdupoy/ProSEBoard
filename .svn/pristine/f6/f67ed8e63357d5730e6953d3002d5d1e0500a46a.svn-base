@@ -1,0 +1,79 @@
+package fr.eseo.ld.proseboard.controllers.admin;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.ibatis.session.SqlSession;
+
+import fr.eseo.ld.proseboard.models.Team;
+import fr.eseo.ld.proseboard.models.TeamUser;
+import fr.eseo.ld.proseboard.models.User;
+import fr.eseo.ld.proseboard.mybatis.MyBatisUtil;
+import fr.eseo.ld.proseboard.mybatis.mappers.TeamMapper;
+import fr.eseo.ld.proseboard.mybatis.mappers.TeamUserMapper;
+import fr.eseo.ld.proseboard.mybatis.mappers.UserMapper;
+
+@WebServlet("/ManageMembers")
+public class ManageMembers extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
+
+    public ManageMembers() {
+        super();
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
+        TeamMapper teamMapper = sqlSession.getMapper(TeamMapper.class);
+        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+        
+        Long idTeam = Long.valueOf(request.getParameter("idTeam"));
+
+        try{
+            Team team = teamMapper.getTeamById(new Long(idTeam));
+            
+            List<User> studentsAvailable = userMapper.getUsersWithoutTeamForCurrentSession();
+    
+            request.setAttribute("editTeam", team);
+            request.setAttribute("students",studentsAvailable);
+            request.getRequestDispatcher("/WEB-INF/JSP/admin/sessions/ManageMembers.jsp").forward(request, response);
+        }finally{
+            sqlSession.close();
+        }
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
+        try{
+            if(request.getParameter("idMemberForDelete") == null) {
+                // On demande l'ajout d'un membre
+                String idMember = request.getParameter("idMember");
+                String idTeam = request.getParameter("idTeam");
+                TeamUserMapper teamUserMapper = sqlSession.getMapper(TeamUserMapper.class);
+                TeamUser teamUser = new TeamUser(new Long(idMember),new Long(idTeam));
+                teamUserMapper.insertTeamUser(teamUser);
+    
+            }else{
+    
+                // On demande la suppression du membre précisé par l'idMember
+                String idMemberForDelete = request.getParameter("idMemberForDelete");
+                TeamUserMapper teamUserMapper = sqlSession.getMapper(TeamUserMapper.class);
+                Long idTeam = new Long(teamUserMapper.getTeamIdFromUserId(new Long(idMemberForDelete)));
+                request.setAttribute("idTeam", idTeam);
+                teamUserMapper.deleteTeamUser(new Long(idMemberForDelete));
+            }
+            sqlSession.commit();
+        }finally{
+            sqlSession.close();
+        }
+        response.sendRedirect(request.getContextPath() + response.encodeRedirectURL("/ManageMembers?idSession="+request.getAttribute("idSession")));
+    }
+}

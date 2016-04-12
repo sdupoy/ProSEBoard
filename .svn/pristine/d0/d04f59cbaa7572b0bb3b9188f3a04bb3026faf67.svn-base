@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Consulting" alias="Consulting"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Status" alias="Status" />
+		<typeAlias type="fr.eseo.ld.proseboard.models.Permission" alias="Permission" />
+		<typeAlias type="fr.eseo.ld.proseboard.models.User" alias="User" />
+		<typeAlias type="fr.eseo.ld.proseboard.models.AuditReport" alias="AuditReport" />
+		<typeAlias type="fr.eseo.ld.proseboard.models.Event" alias="Event"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Expertise" alias="Expertise"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Message" alias="Message"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Session" alias="Session"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Team" alias="Team"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Account" alias="Account"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.PayTeam" alias="PayTeam"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Training" alias="Training"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.TeamUser" alias="TeamUser"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Notification" alias="Notification"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.ExpertiseArea" alias="ExpertiseArea"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.ExpertiseArea" alias="ExpertiseUser"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.AvailableUser" alias="AvailableUser"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Bill" alias="Bill"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.AccountHistory" alias="AccountHistory"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.TrainingUser" alias="TrainingUser"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.Template" alias="Template"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.TemplateTimeslot" alias="TemplateTimeslot"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.StatusUser" alias="StatusUser"/>
+	</typeAliases>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://localhost:3306/proseboard" />
+				<property name="username" value="daoconnect" />
+				<property name="password" value="dao_Connector$" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/UserMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/StatusMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/AuditReportMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/EventMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/MessageMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/ExpertiseMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/SessionMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TeamMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/AccountMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/PayTeamMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TeamUserMapper.xml" />
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TrainingMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/ConsultingMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/NotificationMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/StatusUserMapper.xml"/>		
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/BillMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/AccountHistoryMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TrainingUserMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TemplateMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/TemplateTimeslotMapper.xml"/>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/StatusUserMapper.xml"/>
+	</mappers>
+</configuration>

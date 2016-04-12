@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.PayTeamMapper">
+	
+	<resultMap type="PayTeam" id="TeamsToPayInfo">
+		<id property="idTeam" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="idClient" column="id_client" />
+		<association property="teamLeader" javaType="User">
+			<id property="id" column="id_team_leader"/>
+			<result property="lastName" column="name" />
+			<result property="firstName" column="first_name" />
+		</association>
+		<association property="team" javaType="Team">
+			<id property="id" column="id_team" />
+			<result property="idTeamLeader" column="id_team_leader" />
+			<result property="teamName" column="team_name" />
+			<result property="projectName" column="project_name" />
+		</association>
+	</resultMap> 
+
+	<select id="searchTeamsToPay" resultMap="TeamsToPayInfo">
+		SELECT *, user.name, user.first_name
+		FROM team, user
+		WHERE id_client= #{idUsr}
+		AND team.id_team_leader = id_user
+	</select>
+	
+	<update id="creditTeam" parameterType="PayTeam">
+		UPDATE account, team
+		SET account.solde = (account.solde+#{amount})
+		WHERE team.id_team = #{idTeam}
+		AND account.id_account = (SELECT id_account
+									FROM team
+									WHERE id_team = #{idTeam}
+									AND id_client = #{idClient}) 
+	</update>
+	
+	<update id="debitClient" parameterType="PayTeam">
+		UPDATE account
+		SET account.solde = (account.solde-#{amount})
+		WHERE account.id_account = (SELECT id_account
+									FROM user
+									WHERE id_user = #{idClient})
+	</update>
+</mapper>

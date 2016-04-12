@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.TemplateMapper">
+
+	<resultMap type="Template" id="TemplateResult">
+		<id property="templateId" column="template_id" />
+		<result property="templateName" column="template_name" />
+		<result property="updateAt" column="updated_at" />
+	</resultMap>
+	
+	<select id="getAll" resultMap="TemplateResult">
+		SELECT * FROM template
+		ORDER BY template.updated_at DESC
+	</select>
+	
+	<select id="getById" resultMap="TemplateResult" parameterType="long">
+		SELECT * FROM template
+		WHERE id_template = #{id}
+	</select>
+	
+	<insert id="insert" parameterType="Template" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO template (template_name, updated_at)
+		VALUES(#{templateName}, #{updateAt})
+	</insert>
+
+	<delete id="delete" parameterType="_long">
+		DELETE FROM template
+		WHERE template.template_id = #{id}
+	</delete>
+	
+</mapper>

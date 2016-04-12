@@ -1,0 +1,56 @@
+package fr.eseo.ld.proseboard.models;
+
+public class TemplateTimeslot {
+	
+	private Long TemplateTimeslotId;
+	private String TimeslotName;
+	private int quantity;
+	private Long templateId;
+	private Long teacherId;
+	
+	public TemplateTimeslot(){
+		
+	}
+
+	public Long getTemplateTimeslotId() {
+		return TemplateTimeslotId;
+	}
+
+	public void setTemplateTimeslotId(Long templateTimeslotId) {
+		TemplateTimeslotId = templateTimeslotId;
+	}
+
+	public String getTimeslotName() {
+		return TimeslotName;
+	}
+
+	public void setTimeslotName(String timeSlotName) {
+		TimeslotName = timeSlotName;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public Long getTeacherId() {
+		return teacherId;
+	}
+
+	public void setTeacherId(Long teacherId) {
+		this.teacherId = teacherId;
+	}
+	
+	
+}

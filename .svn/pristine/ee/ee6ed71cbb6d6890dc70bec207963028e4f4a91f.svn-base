@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.AccountHistoryMapper">
+
+	<resultMap type="AccountHistory" id="AccountHistoryResult">
+		<id property="idHistory" column="id_history" />
+		<result property="idAccount" column="id_account" />
+		<result property="solde" column="solde" />
+		<result property="date" column="date_history" />
+	</resultMap>
+	
+	
+	
+	<select id="getByIdHistory" resultMap="AccountHistoryResult" parameterType="_long">
+		SELECT * FROM `account_history` WHERE id_account = #{idAccount} 
+	</select>
+	
+	
+	
+</mapper>

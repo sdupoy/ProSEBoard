@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.TemplateTimeslotMapper">
+
+	<resultMap type="TemplateTimeslot" id="TemplateTimeslotResult">
+		<id property="templateTimeslotId" column="template_timeslot_id" />
+		<result property="timeslotName" column="timeslot_name" />
+		<result property="quantity" column="quantity" />
+		<result property="templateId" column="template_id" />
+		<result property="teacherId" column="teacher_id" />
+			
+	</resultMap>
+	
+	<insert id="insert" parameterType="TemplateTimeslot" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO template_timeslot (template_timeslot_id, timeslot_name, quantity, template_id, teacher_id)
+		VALUES(#{templateTimeslotId}, #{TimeslotName}, #{quantity}, #{templateId}, #{teacherId})
+	</insert>
+	
+	<select id="getAll" resultMap="TemplateTimeslotResult">
+		SELECT * FROM template_timeslot
+		ORDER BY template_timeslot.template_timeslot_id DESC
+	</select>
+	
+	<select id="getForTemplate" resultMap="TemplateTimeslotResult" parameterType="long">
+		SELECT * FROM template_timeslot
+		WHERE template_id = #{id}
+		ORDER BY template_timeslot.template_timeslot_id DESC
+	</select>
+	
+	<delete id="delete" parameterType="_long">
+		DELETE FROM template_timeslot
+		WHERE template_timeslot.template_timeslot_id = #{templateTimeslotId}
+	</delete>
+	
+	<delete id="deleteByIdTemplate" parameterType="_long">
+		DELETE FROM template_timeslot
+		WHERE template_timeslot.template_id = #{id}
+	</delete>
+	
+	
+</mapper>

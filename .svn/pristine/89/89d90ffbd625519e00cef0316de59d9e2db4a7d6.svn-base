@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.NotificationMapper">
+
+	<!-- Le type User est défini dans fr.eseo.ld.proseboard.mybatis:config.xml -->
+	
+	<resultMap type="Notification" id="NotificationResult">
+		<id property="idNotification" column="id_notification" />
+		<result property="idUser" column="id_user" />
+		<result property="idObject" column="id_object" />
+		<result property="type" column="type" />
+		<result property="saw" column="saw" />
+		<result property="createdAt" column="created_at" />
+	</resultMap>	
+	
+	<select id="getById" parameterType="long" resultMap="NotificationResult">
+		SELECT * FROM notification WHERE id_nofitication = #{id}
+	</select>
+
+	<select id="getAllForUser" parameterType="User" resultMap="NotificationResult">
+		SELECT * FROM notification WHERE id_user = #{id}
+		ORDER BY created_at DESC
+	</select>
+	
+	<select id="getUsersCount" parameterType="User" resultType="_int">
+		SELECT COUNT(id_notification)
+		FROM notification
+		WHERE id_user = #{id}
+		AND saw = 0
+	</select>
+	
+	<update id="markAsRead" parameterType="User" flushCache="true" statementType="PREPARED" timeout="20">
+		UPDATE notification
+		SET saw = 1
+		WHERE id_user = #{id}
+	</update>
+	<insert id="addNotification" parameterType="Notification">
+		INSERT INTO notification(id_user,id_object,type,saw)
+		VALUES (#{idUser},#{idObject},#{type},#{saw});
+	</insert>
+</mapper>

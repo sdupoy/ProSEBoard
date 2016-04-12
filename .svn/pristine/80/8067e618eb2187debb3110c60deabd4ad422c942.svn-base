@@ -1,0 +1,107 @@
+package fr.eseo.ld.proseboard.selenium;
+
+import static org.testng.AssertJUnit.assertEquals;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+public class ProseBoardTestTeamLeader {
+	private WebDriver webDriver;
+
+	/*
+	 * Initialise html driver + connexion en tant que team leader
+	 */
+	@BeforeClass
+	public void initiateWebDriver() {
+		webDriver = new HtmlUnitDriver();
+		webDriver.get("http://localhost:8080/proseboard/login");
+		WebElement mailBox = webDriver.findElement(By.name("login"));
+		WebElement passwordBox = webDriver.findElement(By.name("password"));
+		mailBox.sendKeys("etudiant.trois@proseboard.fr");
+		passwordBox.sendKeys("1234");
+		WebElement loginButton = webDriver.findElement(By.name("submit"));
+		loginButton.click();
+	}
+
+	@Test
+	public void testTitle() {
+		assertEquals(webDriver.getTitle(), "ProSEBoard");
+	}
+
+	@Test(dependsOnMethods = { "testTitle" })
+	public void testTeamLeaderOption() {
+		List<WebElement> links = webDriver.findElements(By.tagName("li"));
+		assertEquals(links.get(4).getText(), "Mon équipe");
+		assertEquals(links.get(5).getText(), "Modifier solde");
+		assertEquals(links.get(6).getText(), "Demander une consultation");
+		assertEquals(links.get(7).getText(), "Valider les consultations");
+	}
+
+	/*
+	 * Test du lien vers la page "Mon equipe", test l'url ainsi que les éléments
+	 * présent sur cette page. Test spécifique au profil (l'affichage de
+	 * certaine parties est différent si l'utilisateur change)
+	 */
+	@Test(dependsOnMethods = { "testTeamLeaderOption" })
+	public void testTeamLeaderLinksMyTeam() {
+		WebElement myTeamLink = webDriver
+				.findElement(By.linkText("Mon équipe"));
+		myTeamLink.click();
+		WebElement firstString = webDriver.findElement(By.tagName("h1"));
+		List<WebElement> titleStrings = webDriver
+				.findElements(By.tagName("h3"));
+		WebElement previousConsultationLink = webDriver.findElement(By
+				.linkText("Voir les consultations précédentes"));
+		assertEquals(webDriver.getCurrentUrl(),
+				"http://localhost:8080/proseboard/team");
+		assertEquals(firstString.getText(), "Equipe D - Session 2015");
+		assertEquals(titleStrings.get(0).getText(), "Audits à venir");
+		assertEquals(titleStrings.get(1).getText(), "Consultations à venir");
+		assertEquals(titleStrings.get(2).getText(), "Membres");
+		assertEquals(previousConsultationLink.getText(),
+				"Voir les consultations précédentes");
+	}
+
+	@Test(dependsOnMethods = { "testTeamLeaderLinksMyTeam" })
+	public void testTeamLeaderLinksAskingConsultation() {
+		WebElement askingConsultationLink = webDriver.findElement(By
+				.linkText("Demander une consultation"));
+		askingConsultationLink.click();
+		WebElement firstString = webDriver.findElement(By.tagName("h2"));
+		WebElement secondString = webDriver.findElement(By.tagName("h4"));
+		WebElement formMethod = webDriver.findElement(By.tagName("form"));
+		List<WebElement> selectOptions = webDriver.findElements(By
+				.tagName("select"));
+		List<WebElement> inputFields = webDriver.findElements(By
+				.tagName("input"));
+		assertEquals(webDriver.getCurrentUrl(),
+				"http://localhost:8080/proseboard/TeamLeader/ReservationConsultation");
+		assertEquals(firstString.getText(),
+				"Chercher les consultations possibles");
+		assertEquals(secondString.getText(),
+				"Insérer les informations suivantes");
+		assertEquals(formMethod.getAttribute("action"),
+				"/proseboard/TeamLeader/ReservationConsultation");
+		assertEquals(selectOptions.get(0).getAttribute("name"), "idExpertise");
+		assertEquals(selectOptions.get(1).getAttribute("name"), "idUser");
+		assertEquals(selectOptions.get(2).getAttribute("name"), "eventType");
+		assertEquals(inputFields.get(0).getAttribute("name"), "description");
+		assertEquals(inputFields.get(1).getAttribute("name"), "start");
+		assertEquals(inputFields.get(2).getAttribute("name"), "end");
+	}
+
+	@Test(dependsOnMethods = { "testTeamLeaderLinksMyTeam" })
+	public void testTeamLeaderLinksChangeAccount() {
+		WebElement modifyAccountLink = webDriver.findElement(By
+				.linkText("Modifier solde"));
+		modifyAccountLink.click();
+		assertEquals(webDriver.getCurrentUrl(),
+				"http://localhost:8080/proseboard/EditAccountTeam");
+	}
+}

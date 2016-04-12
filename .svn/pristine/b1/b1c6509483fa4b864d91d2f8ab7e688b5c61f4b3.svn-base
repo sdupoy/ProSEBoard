@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.ConsultingMapper">
+ 	<resultMap type="Consulting" id="ConsultingResult">
+ 		<id property="id" column="id_consult"/>
+ 		<result property="idConsultant" column="id_consultant"/>
+ 		<result property="idTeam" column="id_team"/>
+ 		<result property="idEvent" column="id_event"/>
+ 		<result property="hourCost" column="hourCost"/>
+ 		<result property="report" column="report"/>
+ 		<result property="isCharged" column="isCharged"/>
+ 		<association property="event" javaType="Event">
+			<id property="id" column="id_event" />
+			<result property="description" column="event_description"/>
+			<result property="startDate" column="start_date" />
+			<result property="endDate" column="end_date" />
+		</association>
+ 	</resultMap>
+ 	
+ 	<resultMap type="Consulting" id="ConsultingForCharge">
+		<id property="id" column="id_consult" />
+		<result property="idConsultant" column="id_consultant" />
+		<result property="idTeam" column="id_team"/>
+ 		<result property="idEvent" column="id_event"/>
+		<result property="hourCost" column="hourCost" />
+		<result property="isCharged" column="isCharged"/>
+		<association property="event" javaType="Event">
+			<id property="id" column="id_event" />
+			<result property="description" column="event_description"/>
+			<result property="startDate" column="start_date" />
+			<result property="endDate" column="end_date" />
+		</association>
+		<association property="team" javaType="Team">
+			<id property="id" column="id_team" />
+			<result property="teamName" column="team_name" />
+			<result property="projectName" column="project_name" />
+		</association>
+	</resultMap>
+	
+	<resultMap type="Consulting" id="ConsultingReportResultWithUsers">
+		<id property="id" column="id_consult" />
+		<result property="date" column="date" />
+		<result property="hours" column="hours" />
+		<result property="report" column="report" />
+		<result property="idConsultant" column="id_consultant" />
+		<result property="isCharged" column="isCharged"/>
+		<association property="team" javaType="Team">
+			<id property="id" column="id_team" />
+			<result property="teamName" column="team_name" />
+			<result property="projectName" column="project_name" />
+		</association>
+		<association property="event" javaType="Event">
+			<id property="id" column="id_event" />
+			<result property="startDate" column="start_date" />
+			<result property="endDate" column="end_date" />
+		</association>
+		<association property="consultant" javaType="User">
+			<id property="idUser" column="id_user" />
+			<result property="lastName" column="last_name" />
+			<result property="firstName" column="first_name" />
+			<result property="mail" column="mail_address" />
+		</association>		
+	</resultMap>
+ 	
+ 	<select id="getAll" resultMap="ConsultingResult">
+		SELECT * 
+		FROM consulting
+	</select>
+	
+	
+	<select id="getConsByIdTeam" parameterType="map" resultMap="ConsultingResult">
+   			SELECT * FROM consulting WHERE consulting.id_team IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idTeam}
+    	</foreach>
+	</select>
+	
+	<select id="getAllWithUsers" resultMap="ConsultingReportResultWithUsers">
+		SELECT consulting.*, user.name as last_name, user.first_name, team.team_name, team.project_name, event.start_date, event.end_date
+		FROM consulting, user, team, event
+		WHERE user.id_user = consulting.id_consultant
+		AND consulting.id_team = team.id_team
+		AND event.id_event = consulting.id_event
+	</select>
+	
+	<select id="getById" parameterType="long" resultMap="ConsultingResult">
+		SELECT *
+		FROM consulting
+		WHERE id_consult=#{id}
+	</select>
+	
+	<select id="getByEventId" parameterType="Long" resultMap="ConsultingResult">
+		SELECT * FROM consulting
+		WHERE id_event=#{id}
+	</select>
+	
+	<select id="getByConsultant" parameterType="long" resultMap="ConsultingResult">
+		SELECT * FROM consulting, event
+		WHERE id_consultant = #{idConsultant}
+		AND consulting.id_event = event.id_event
+	</select>
+	
+	<select id="getByConsultantForReport" parameterType="long" resultMap="ConsultingForCharge">
+		SELECT * FROM consulting, event
+		WHERE id_consultant = #{idConsultant}
+		AND consulting.id_event = event.id_event
+		AND consulting.report IS NULL
+	</select>
+	
+	<select id="getByTeam" parameterType="long" resultMap="ConsultingResult">
+		SELECT *
+		FROM consulting
+		JOIN id ON consulting.id_team = team.id_team
+		WHERE
+		id_team=#{idTeam}
+	</select>
+	
+	<select id="getIdTeamById" parameterType="Long" resultType="Long">
+		SELECT consulting.id_team FROM consulting
+		WHERE id_consult=#{id}
+	</select>
+ 	
+ 	<insert id="insertConsulting">
+ 		INSERT INTO consulting (id_event,id_consultant,id_team)
+ 		VALUES (#{idEvent},#{idConsultant},#{idTeam});
+ 	</insert>
+ 	
+ 	<insert id="insert" parameterType="Consulting"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO
+		consulting(id_consultant,id_team,date,hours,report)
+		VALUES
+		(#{idConsultant},#{idTeam},#{date},#{hours},#{report})
+	</insert>
+
+	<delete id="deleteConsultingReportsBySessionId" parameterType="long">
+		DELETE c FROM consulting c
+		LEFT JOIN team t
+		ON t.id_team = c.id_team
+		WHERE t.id_session = #{idSession}
+	</delete>
+	
+	
+	<select id="searchConsult" resultMap="ConsultingForCharge">
+		SELECT consulting.*, team_name, project_name, event.start_date, event.end_date
+		FROM consulting, team, event
+		WHERE id_consultant= #{idUsr}
+		AND isCharged = 0
+		AND consulting.id_team = team.id_team
+        AND event.id_event = consulting.id_event
+	</select>
+	
+	<update id="setConsultToCharged" parameterType="Consulting">
+		UPDATE consulting
+		SET isCharged = true
+		WHERE id_consult = #{id}
+		AND id_consultant= #{idConsultant}
+		AND isCharged = false;
+	</update>
+	
+	<update id="chargeTeam" parameterType="Consulting">
+		UPDATE account, team, consulting
+		SET account.solde = (account.solde-(#{hourCost}*#{nbHours}))
+		WHERE team.id_team = (SELECT id_team 
+						FROM consulting 
+						WHERE id_consult=#{id} 
+						AND id_consultant= #{idConsultant}) 
+		AND account.id_account = team.id_account
+		AND consulting.id_consult = #{id}
+		AND consulting.id_consultant= #{idConsultant}
+		AND consulting.id_team = team.id_team;
+	</update>
+	
+	<update id="creditConsultant" parameterType="Consulting">
+		UPDATE account, team, consulting, user
+		SET account.solde = (account.solde+(#{hourCost}*#{nbHours}))
+		WHERE team.id_team = (SELECT id_team 
+						FROM consulting 
+						WHERE id_consult=#{id} 
+						AND id_consultant= #{idConsultant}) 
+		AND account.id_account = user.id_account
+		AND user.id_user = #{idConsultant}
+		AND consulting.id_consult = #{id}
+		AND consulting.id_consultant= #{idConsultant}
+		AND consulting.id_team = team.id_team;
+	</update>
+	
+	<update id="updateReport" parameterType="Consulting">
+		UPDATE consulting
+		SET report = #{report}
+		WHERE id_consult = #{id}
+		AND id_consultant= #{idConsultant}
+	</update>
+
+ 	
+ </mapper>

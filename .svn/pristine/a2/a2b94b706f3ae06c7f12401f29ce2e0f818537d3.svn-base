@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.TeamMapper">
+
+	<resultMap type="Team" id="TeamResultWithMembers">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="idAccount" column="id_account"/>
+		<association property="account" javaType="Account">
+			<id property="idAccount" column="id_account"/>
+    		<result property="balance" column="solde"/>
+		</association>
+		<collection property="members" javaType="ArrayList" ofType="User" resultMap="fr.eseo.ld.proseboard.mybatis.mappers.UserMapper.UserResult" />
+	</resultMap>
+	
+	<resultMap type="Team" id="TeamResultWithMembersAndAccounts">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="idAccount" column="teamAccount"/>
+		<association property="account" javaType="Account">
+			<id property="idAccount" column="teamAccount"/>
+    		<result property="balance" column="solde"/>
+		</association>
+		<collection property="members" javaType="ArrayList" ofType="User" resultMap="fr.eseo.ld.proseboard.mybatis.mappers.UserMapper.UserResult" />
+	</resultMap>
+	
+	<resultMap type="Team" id="TeamResultWithMembersAndSession">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="projectName" column="project_name" />
+		<result property="teamYear" column="team_year" />
+		<association property="session" javaType="Session">
+			<id property="id" column="id_session"/>
+			<result property="name" column="sessName"/>
+		</association>
+		<association property="account" javaType="Account">
+			<id property="idAccount" column="id_account"/>
+    		<result property="balance" column="solde"/>
+		</association>
+		<collection property="members" javaType="ArrayList" ofType="User" resultMap="fr.eseo.ld.proseboard.mybatis.mappers.UserMapper.UserResult" />
+	</resultMap>
+	
+	<resultMap type="User" id="UserResult">
+		<id property="id" column="id_user" />
+		<result property="mail" column="mail_address" />
+		<result property="lastName" column="name" />
+		<result property="firstName" column="first_name" />
+		<collection property="statuses" javaType="ArrayList" ofType="Status" column="id_status" resultMap="fr.eseo.ld.proseboard.mybatis.mappers.StatusMapper.StatusResult" />
+	</resultMap>
+	
+	<resultMap type="Team" id="TeamResult">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="projectName" column="project_name" />
+		<result property="idClient" column="id_client" />
+		<result property="nbMembers" column="nb_member" />
+		<result property="idSession" column="id_session" />
+		<association property="account" javaType="Account">
+			<id property="idAccount" column="id_account"/>
+    		<result property="balance" column="solde"/>
+		</association>
+	</resultMap>
+	
+	
+	<resultMap type="Team" id="TeamResult2">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="projectName" column="project_name" />
+		<result property="idClient" column="id_client" />
+		<result property="nbMembers" column="nb_member" />
+		<result property="idSession" column="id_session" />
+    	<result property="idAccount" column="id_account"/>	
+	</resultMap>
+	
+	
+	<select id="getAllTeam" resultMap="TeamResult">
+		SELECT id_team, team_name, project_name FROM team
+	</select>
+	
+	<select id="getTeamNameById" resultMap="TeamResult" parameterType="_long">
+		SELECT team.team_name 
+		FROM `team` 
+		LEFT JOIN team_user ON team.id_team = team_user.id_team
+		JOIN user ON team_user.id_user = user.id_user
+		WHERE team.id_team = #{id} 
+	</select>
+	
+	<select id="getProjectNameById" resultMap="TeamResult" parameterType="_long">
+		SELECT team.project_name
+		FROM team
+		WHERE team.id_team = #{id} 
+	</select>
+	
+	<select id="getTeamByIdTeam" resultMap="TeamResult" parameterType="_long">
+		SELECT *
+		FROM team
+		WHERE team.id_team = #{id} 
+	</select>
+	
+	
+	<select id="getIdAccountByIdTL" resultType="_long" parameterType="_long">
+		SELECT MAX(team.id_account)
+		FROM team
+		WHERE team.id_team_leader = #{id} 
+	</select>
+	
+	<resultMap type="User" id="SimpleTeamMemberResult">
+		<id property="id" column="id_user" />
+		<result property="lastName" column="name" />
+		<result property="firstName" column="first_name" />
+	</resultMap>
+
+	<select id="getById" parameterType="long" resultMap="TeamResultWithMembers">
+		SELECT team.*, account.solde, user.id_user, user.mail_address, user.name, user.first_name  FROM team
+		LEFT JOIN team_user ON team.id_team = team_user.id_team
+		LEFT JOIN account ON team.id_account = account.id_account
+		JOIN user ON team_user.id_user = user.id_user
+		WHERE team.id_team = #{id};
+	</select>
+	
+	<select id="getTeamByTL" parameterType="long" resultMap="TeamResultWithMembersAndAccounts">
+		SELECT team.id_team, team.id_team_leader, team.id_session, team.id_account as teamAccount, user.name, user.first_name, user.id_account
+		FROM team
+        LEFT JOIN team_user ON team.id_team = team_user.id_team
+		LEFT JOIN account ON team.id_account = account.id_account
+		JOIN user ON team_user.id_user = user.id_user
+		WHERE team.id_team_leader = #{idTeamLeader}
+	</select>
+
+	<select id="getById2" parameterType="long" resultMap="UserResult">
+		SELECT user.* from user
+		WHERE id_user IN (
+			SELECT team_user.id_user FROM team_user
+			WHERE team_user.id_user = id_user
+			AND team_user.id_team = #{id}
+		)
+	</select>
+	
+	
+	<select id="getUserTeam" parameterType="User" resultMap="TeamResultWithMembers">
+		SELECT team.*, account.solde, user.id_user, user.mail_address, user.name, user.first_name  FROM team
+		LEFT JOIN team_user ON team.id_team = team_user.id_team
+		LEFT JOIN account ON team.id_account = account.id_account
+		JOIN user ON team_user.id_user = user.id_user
+		WHERE team.id_team = (
+			SELECT team.id_team FROM team
+			LEFT JOIN team_user ON team.id_team = team_user.id_team
+			LEFT JOIN session ON team.id_session = session.id
+			WHERE team_user.id_user = #{id}
+			ORDER BY session.start_date DESC
+			LIMIT 1
+		)
+	</select>
+	
+	<select id="getTeamsFromSession" resultMap="TeamResultWithMembers" parameterType="Long">
+		SELECT * FROM team WHERE id_session = #{idSession} 
+		ORDER BY team.team_name
+	</select>
+	
+	<select id="getAll" resultMap="TeamResult">
+		SELECT * FROM team
+	</select>
+	
+	<select id="getTeamName" resultType="String" parameterType="long">
+		SELECT team.team_name FROM team
+		WHERE team.id_team = #{id}
+	</select>
+	
+	<select id="getSession" resultType="Long" parameterType="long">
+		SELECT team.id_session FROM team
+		WHERE team.id_team = #{id}
+	</select>
+	
+	<select id="getIdTLByIdTeam" resultType="Long" parameterType="long">
+		SELECT team.id_team_leader FROM team
+		WHERE team.id_team = #{id}
+	</select>
+	
+	<select id="getTeamsByClient" resultMap="TeamResultWithMembersAndSession" parameterType="long">
+		SELECT team.*, session.name as sessName, account.solde, user.id_user, user.name, user.first_name 
+		FROM team
+        LEFT JOIN session ON team.id_session = session.id
+        LEFT JOIN team_user ON team.id_team = team_user.id_team
+		LEFT JOIN account ON team.id_account = account.id_account
+		JOIN user ON team_user.id_user = user.id_user
+		WHERE id_client = #{idClient}
+	</select>
+	
+	<insert id="insert" parameterType="Team" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO team(id_team_leader, team_name, project_name, id_session, id_account, id_client)
+		VALUES(#{idTeamLeader}, #{teamName}, #{projectName}, #{idSession}, #{idAccount}, #{idClient})
+	</insert>
+	
+	<select id="getTeamsFromAuditor" resultType="Long">
+		SELECT *
+		FROM team
+		WHERE id_client = #{idClient}
+		AND id_session = #{idSession}
+	</select>
+	
+	<select id="getSessionMax" resultType="Long">
+		SELECT MAX(id_session)
+		FROM team
+	</select>
+	
+	<select id="getIdTeamPrevious" resultType="long" parameterType="long">
+		SELECT MIN(id_team)
+		FROM team
+		WHERE team.id_team_leader = #{id}
+	</select>
+	
+	<select id="getIdTeamActual" resultType="long" parameterType="long">
+		SELECT MAX(id_team)
+		FROM team
+		WHERE team.id_team_leader = #{id}
+	</select>
+	
+	<select id="getTeamById" resultMap="TeamResult" parameterType="long">
+		SELECT * FROM team WHERE id_team = #{idTeam}
+	</select>
+	
+	<delete id="deleteTeamById" parameterType="long">
+		DELETE FROM team WHERE id_team = #{id}
+	</delete>
+	
+	<delete id="deleteTeamsAndAccountsBySessionId" parameterType="long">
+		DELETE a, t FROM team t, account a WHERE t.id_session = #{id} AND t.id_account = a.id_account
+	</delete>
+	
+	<select id="getMembersByTeamId" parameterType="long" resultMap="SimpleTeamMemberResult">
+		SELECT u.id_user, u.name, u.first_name 
+		FROM user u
+		LEFT JOIN team_user tu ON tu.id_user = u.id_user
+		WHERE tu.id_team = #{id}
+		ORDER BY u.name	
+	</select>	
+	
+	<select id="getAllTeamsByTeamUsers" parameterType="map" resultMap="TeamResult">
+   			SELECT * FROM team WHERE team.id_team IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idTeam}
+    	</foreach>
+	</select>
+	
+	<select id="getAllTeamsByTeamUsers2" parameterType="map" resultMap="TeamResult">
+   			SELECT * FROM team WHERE team.id_team IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}]}
+    	</foreach>
+	</select>
+
+</mapper>

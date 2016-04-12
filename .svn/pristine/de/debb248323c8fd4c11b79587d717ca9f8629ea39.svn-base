@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="fr.eseo.ld.proseboard.models.RedmineEvent" alias="RedmineEvent"/>
+		<typeAlias type="fr.eseo.ld.proseboard.models.User" alias="User"/>
+	</typeAliases>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="com.mysql.jdbc.Driver" />
+				<property name="url" value="jdbc:mysql://192.168.4.14:3306/redmine" />
+				<property name="username" value="redmine" />
+				<property name="password" value="zatery" />
+			</dataSource>
+		</environment>
+	</environments>
+	<mappers>
+		<mapper resource="/fr/eseo/ld/proseboard/mybatis/mappers/RedmineEventMapper.xml" />
+	</mappers>
+</configuration>

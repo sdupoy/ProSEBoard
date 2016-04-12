@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.UserMapper">
+
+	<!-- Le type User est défini dans fr.eseo.ld.proseboard.mybatis:config.xml -->
+	<resultMap type="User" id="UserResult">
+		<id property="id" column="id_user" />
+		<result property="idRedmine" column="id_redmine" />
+		<result property="mail" column="mail_address" />
+		<result property="lastName" column="name" />
+		<result property="firstName" column="first_name" />
+		<result property="idAccount" column="id_account" />
+		<collection property="statuses" javaType="ArrayList"
+			ofType="Status" column="id_status"
+			resultMap="fr.eseo.ld.proseboard.mybatis.mappers.StatusMapper.StatusResult" />
+	</resultMap>
+
+
+	<resultMap type="User" id="UserResultWithPermissions">
+		<id property="id" column="id_user" />
+		<result property="idRedmine" column="id_redmine" />
+		<result property="mail" column="mail_address" />
+		<result property="password" column="password" />
+		<result property="lastName" column="name" />
+		<result property="firstName" column="first_name" />
+		<association property="account" javaType="Account">
+			<id property="idAccount" column="id_account"/>
+    		<result property="balance" column="solde"/>
+		</association>
+		<collection property="statuses" javaType="ArrayList" ofType="Status" column="id_status" resultMap="fr.eseo.ld.proseboard.mybatis.mappers.StatusMapper.StatusResult" />
+		<collection property="permissions" javaType="ArrayList" ofType="Permission" column="id_permission">
+			<id property="id" column="permission_id" />
+			<result property="name" column="permission_name" />
+		</collection>
+	</resultMap>
+	
+	<resultMap type="Team" id="TeamResult">
+		<id property="id" column="id_team" />
+		<result property="idTeamLeader" column="id_team_leader" />
+		<result property="teamName" column="team_name" />
+		<result property="idAccount" column="id_account"/>
+	</resultMap>
+						
+	<select id="getStudentBySession" resultType="Long" parameterType="long">		
+		SELECT session.id FROM `session` 
+		LEFT JOIN status_user ON session.id = status_user.id_session 
+		LEFT JOIN status ON status_user.id_status = status.id_status 
+		LEFT JOIN user ON status_user.id_user = user.id_user 
+		WHERE user.id_user = #{id} and (status.id_status = 4 OR status.id_status = 6)
+		GROUP BY user.id_user;
+	</select>
+	
+	<resultMap type="AvailableUser" id="AvailableUserResult">
+		<id property="idUser" column="id_user" />
+		<result property="dateStart" column="date_start" />
+		<result property="dateEnd" column="date_end" />
+	</resultMap>
+	
+
+	<select id="getByIdAccount" parameterType="int" resultMap="UserResult">		
+		SELECT user.id_account FROM user
+		JOIN account ON user.id_account = account.id_account
+		WHERE user.id_account = #{id};
+	</select>
+	
+	<select id="getById" parameterType="long" resultMap="UserResult">
+		SELECT *
+		FROM user
+		WHERE id_user = #{id}
+	</select>
+	
+	<select id="getAvailableById" parameterType="long" resultMap="AvailableUserResult">
+		SELECT * FROM available_user
+		WHERE id_user = #{id}
+		ORDER BY date_start DESC
+	</select>
+	
+	<select id="getAllAvailable" resultMap="AvailableUserResult">
+		SELECT * FROM available_user
+		ORDER BY date_start DESC
+	</select>
+	
+
+	<select id="getMail" parameterType="int" resultType="String">
+		SELECT
+		mail_address
+		FROM user
+		WHERE id_user = #{id}
+	</select>
+	
+	
+	<select id="getByMailWithPermissions" resultMap="UserResultWithPermissions">
+		SELECT permission.id as permission_id, permission.name as permission_name, user.*, status.*, status_user.* FROM user
+		JOIN status_user ON user.id_user = status_user.id_user
+		JOIN status ON status_user.id_status = status.id_status
+		JOIN status_permission ON status.id_status = status_permission.id_status
+		JOIN permission ON status_permission.id_permission = permission.id
+		LEFT JOIN session ON status_user.id_session = session.id
+		WHERE user.mail_address = #{userMail}
+		AND(
+			status_user.id_session IS NULL
+			OR
+			session.is_open = 1
+		)
+	</select>
+
+	<select id="getAll" resultMap="UserResult">
+		SELECT * FROM user JOIN status ON user.id_status = status.id_status
+	</select>
+	<select id="getAll2" resultMap="UserResult">
+		SELECT * FROM user 
+	</select>
+	
+	<select id="getAllWithPermissions" resultMap="UserResultWithPermissions">
+		SELECT permission.id as permission_id, permission.name as permission_name, user.*, status.* FROM user 
+		JOIN status_user ON user.id_user = status_user.id_user
+		JOIN status ON status_user.id_status = status.id_status
+		LEFT JOIN status_permission ON status.id_status = status_permission.id_status
+		LEFT JOIN permission ON status_permission.id_permission = permission.id
+		ORDER BY mail_address
+	</select>
+	
+	<select id="getAllUserByStatus" parameterType="long" resultMap="UserResult">
+		SELECT id_user, 
+			mail_address, 
+			password, 
+			first_name, 
+			name 
+			FROM user  
+            WHERE id_user IN 
+			( 
+				SELECT id_user 
+				FROM status_user 
+				WHERE id_status = #{id}
+			)
+	</select>
+	
+	<select id="getAllEtudiant" resultMap="UserResult">
+		SELECT * FROM user 
+		LEFT JOIN status_user ON user.id_user = status_user.id_user 
+		WHERE status_user.id_status = 4 OR status_user.id_status = 5 OR status_user.id_status = 6 
+	</select>
+	
+	<select id="getAllUser" resultMap="UserResult">
+		SELECT * FROM user ORDER BY mail_address
+	</select>
+	
+	<select id="getTeam" parameterType="long" resultMap="TeamResult">
+		SELECT Team.*
+		FROM Team
+		WHERE Team.id_team In (
+			SELECT team_user.id_team
+			FROM team_user
+			WHERE team_user.id_user = #{idUser}
+		)
+	</select> 
+	
+	<select id="getTeamList" parameterType="Long" resultMap="TeamResult">
+		SELECT Team.*
+		FROM Team
+		WHERE Team.id_team In (
+			SELECT team_user.id_team
+			FROM team_user
+			WHERE team_user.id_user = #{idUser}
+		)
+	</select>
+	
+	<select id="getUsersWithoutTeamForCurrentSession" resultMap="UserResult">
+	SELECT user.id_user, user.name, user.first_name
+		FROM user
+		JOIN status_user ON user.id_user = status_user.id_user
+		JOIN status ON status_user.id_status = status.id_status
+		WHERE status.status_name IN ('team_member','team_leader', 'student')
+		AND user.id_user NOT IN (
+			SELECT user.id_user
+				FROM user
+				JOIN status_user ON user.id_user = status_user.id_user
+				JOIN status ON status_user.id_status = status.id_status
+				LEFT JOIN session ON status_user.id_session = session.id
+				WHERE session.is_open = 1)
+	</select>
+
+	<insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO user(mail_address, password, first_name, name, id_redmine, id_account)
+		VALUES(#{mail}, #{password}, #{firstName}, #{last_name}, #{idRedmine}, #{account.idAccount})
+	</insert>
+	
+	<insert id="insertAvailable" parameterType="AvailableUser" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO available_user(id_user, date_start, date_end)
+		VALUES(#{idUser}, #{dateStart}, #{dateEnd})
+	</insert>
+
+	<update id="update" parameterType="User">
+		UPDATE user
+		SET
+		password = #{password},
+		first_name = #{firstName},
+		name = #{name}
+		WHERE id_user = #{id}
+	</update>
+
+	<delete id="delete" parameterType="int">
+		DELETE FROM user WHERE id_user = #{id}
+	</delete>
+	
+	<select id="getPotentialBillReceivers" resultMap="UserResult" parameterType="long">
+		SELECT DISTINCT * FROM user u
+		LEFT JOIN status_user su ON u.id_user = su.id_user
+		LEFT JOIN status s ON s.id_status = su.id_status
+		WHERE (u.id_user != #{idBillEmitter}) 
+		AND s.status_name = 'client'
+		ORDER BY name
+	</select>
+	
+	
+	<select id="selectExists" parameterType="map">
+		SELECT *
+		FROM user
+		WHERE EXISTS(
+			SELECT *
+			FROM status_user
+			WHERE user.id_user = status_user.id_user
+			AND status_user.id_status = #{idStatus.id}
+			AND status_user.id_user = #{idUser.id}
+		)
+	</select>
+	
+	<select id="getIdEventsAttended" parameterType="long" resultType="long">
+		SELECT event_user.id_event
+		FROM event_user
+		WHERE event_user.id_user = #{idUser}
+	</select>
+	
+	<select id="getAllByIdUsers" parameterType="map" resultMap="UserResult">
+   			SELECT * FROM user WHERE user.id_user IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idUser}
+    	</foreach>
+	</select>
+	
+	<select id="getAllByIdStatus" parameterType="map" resultMap="UserResult">
+   			SELECT * FROM user WHERE user.id_user IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idUser}
+    	</foreach>
+	</select>
+	
+	
+	<update id="setAbsence" parameterType="map">
+		UPDATE event_user
+		SET isAbsent = true
+		WHERE event_user.id_event = #{idEvent}
+		AND event_user.id_user = #{idUser} 
+	</update>
+
+</mapper>

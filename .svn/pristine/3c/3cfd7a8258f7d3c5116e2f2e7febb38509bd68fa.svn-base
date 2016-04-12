@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.EventMapper">
+
+	<!-- Le type User est défini dans fr.eseo.ld.proseboard.mybatis:config.xml -->
+	
+	<resultMap type="Event" id="EventResult">
+		<id property="id" column="id_event" />
+		<result property="name" column="event_name" />
+		<result property="description" column="event_description" />
+		<result property="startDate" column="start_date" />
+		<result property="endDate" column="end_date" />
+		<result property="validation" column="validation" />
+		<result property="idCreator" column="id_creator" />
+		<result property="type" column="type" />
+	</resultMap>
+	
+	<select id="getById" parameterType="_long" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE id_event = #{id}
+		ORDER BY id_event DESC
+	</select>
+	
+	<select id="getLastId"  resultType="_long">
+		SELECT MAX(id_event) FROM event
+	</select>
+	
+	<select id="getById2" parameterType="map" resultMap="EventResult">
+		 SELECT event.id_event, event.event_name, event.start_date, event.end_date 
+		 FROM event 
+		 LEFT JOIN training ON event.id_event = training.id_event 
+		 LEFT JOIN training_user ON training.id_training = training_user.id_training 
+		 LEFT JOIN user ON training_user.id_user = user.id_user 
+		 WHERE training_user.id_user = #{id} AND training_user.isAbsent = 1 
+	</select>
+	
+	<select id="getBetween" parameterType="map" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE start_date <![CDATA[ > ]]> #{start}
+		AND end_date <![CDATA[ < ]]> #{stop}
+	</select>
+	
+	<select id="existsBetween" parameterType="map" resultType="_int">
+		SELECT COUNT(*) as value FROM event_user eu
+		JOIN event
+		ON eu.id_event = event.id_event
+		WHERE eu.id_user = #{user.id}
+		AND (
+				(
+					start_date BETWEEN #{start} AND #{end}
+					OR end_date BETWEEN #{start} AND #{end}
+				) OR (
+					start_date <![CDATA[ < ]]> #{start} 
+					AND end_date <![CDATA[ > ]]> #{end}
+				)
+			);	
+	</select>
+	
+	<select id="getAllForUser" parameterType="User" resultMap="EventResult">
+		SELECT * FROM event_user eu
+		JOIN event
+		ON eu.id_event = event.id_event
+		WHERE eu.id_user = #{id}
+		AND event.visible = 1;
+	</select>
+	
+	<select id="getAllForIdEvent" parameterType="long" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE event.id_event = #{id};
+	</select>	
+	
+	<select id="getAllForCreator" parameterType="long" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE event.id_creator = #{id}
+		ORDER BY event.start_date DESC
+	</select>	
+	
+	<insert id="insertEvent" parameterType="Event" useGeneratedKeys="true" keyProperty="id" keyColumn="id_event">
+		INSERT INTO event(event_name, event_description, start_date, end_date, id_creator, type)
+		VALUES(#{name}, #{description}, #{startDate}, #{endDate}, #{idCreator}, #{type});
+	</insert>
+	
+	<delete id="deleteEvent" parameterType="Event">
+		DELETE FROM event WHERE event.id_event = #{id}
+	</delete>
+	
+	<delete id="deleteEventUser" parameterType="Event">
+		DELETE FROM event_user WHERE event_user.id_event = #{id}
+	</delete>
+	
+	<insert id="bindEventToUser" parameterType="map">
+		INSERT INTO event_user(id_event, id_user)
+		VALUES(#{event.id}, #{user.id});
+	</insert>
+	
+	<select id="getAllByCreator" parameterType="_long" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE event.validation=0
+		AND event.id_creator = #{id}
+		ORDER BY event.validation;
+	</select>
+	
+	<select id="getAllValidateByUser" parameterType="_long" resultMap="EventResult">
+		SELECT * FROM event
+		WHERE event.validation=1
+		AND id_event IN
+        (
+            SELECT id_event FROM event_user
+            WHERE event_user.id_user = #{id}
+        );
+	</select>
+	
+	<update id="validateById" parameterType="long">
+		UPDATE event
+		SET validation=1
+		WHERE id_event = #{id}
+		ORDER BY id_event DESC
+	</update>
+	
+	<update id="acceptById" parameterType="long">
+		UPDATE event
+		SET validation=2
+		WHERE id_event = #{id};
+	</update>
+	
+	<update id="refuseById" parameterType="long">
+		UPDATE event
+		SET validation=3
+		WHERE id_event = #{id}
+	</update>
+		
+	<update id="updateByEducator" parameterType="Event">
+	 	UPDATE event 
+	 	SET 
+	 		event_name = #{name},
+	 		validation = #{validation},
+	 		id_creator = #{idCreator},
+	 		type = #{type},
+	 		start_date = #{startDate},
+	 		end_date = #{endDate},
+	 		event_description = #{description}
+	 	WHERE id_event = #{id}	
+	</update> 
+	
+	<select id="selectUserIdForEventId" parameterType="long" resultType="long">
+		SELECT id_user FROM event_user
+		WHERE id_event = #{idEvent}
+	</select>
+	
+	
+	<select id="getEventByIdConsultings" parameterType="map" resultMap="EventResult">
+   			SELECT * FROM event WHERE event.id_event IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idEvent}
+    	</foreach>
+	</select>
+	
+	<select id="getEventByIdTrainings" parameterType="map" resultMap="EventResult">
+   			SELECT * FROM event WHERE event.id_event IN 
+    	<foreach collection="list" item="item" index="index" open="(" close=")" separator=", ">
+    		#{list[${index}].idEvent}
+    	</foreach>
+	</select>
+
+</mapper>

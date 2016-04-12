@@ -1,0 +1,45 @@
+package fr.eseo.ld.proseboard.models;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Template {
+	
+	private Long templateId;
+	private String templateName;
+	private Date updateAt;
+	
+	public Template(){
+		
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public Date getUpdateAt() {
+		return updateAt;
+	}
+
+	public void setUpdateAt(Date updateAt) {
+		this.updateAt = updateAt;
+	}
+	
+	public String getUpdateAtPrintf() {
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		return sdf.format(updateAt);
+	}
+	
+}

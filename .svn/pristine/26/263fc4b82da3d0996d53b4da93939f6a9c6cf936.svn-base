@@ -1,0 +1,35 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags"%>
+
+<t:main>
+	<div class="row">
+		<div class="col-sm-10 col-md-10 col-lg-10">
+			<h1>Gestion des équipes</h1><br>		
+			<div class="list-group">
+  				<div class="list-group-item active"><b><label style="font-size:24px"><c:out value="${sessionName}"/> / Equipes</label></b></div>
+		  			<c:forEach items="${teams}" var="team">
+		  				<div class="list-group-item" style="height: 70px">
+		  				<form method="get" action="DeleteTeam">
+			  				<button class="btn btn-warning pull-right" style="margin-left:25px" type="submit" name="idTeam" value="${team.getId()}">
+			 					 <span class="glyphicon glyphicon-remove" aria-hidden="true" style="font-size:15px"></span>
+							</button>
+						</form>	
+						<form method="get" action="ManageMembers">
+							<button class="btn btn-primary pull-left" type="submit" style="margin-right:15px" name="idTeam" value="${team.getId()}">
+			 					 <span class="glyphicon glyphicon-plus" aria-hidden="true" style="font-size:15px"></span>
+							</button>
+						</form>	
+			  			<span class="label label-success label-as-badge pull-right" style="margin-left:5px;font-size:14px">&nbsp;Membres: <c:out value="${team.getMembers().size()}"/>&nbsp;</span>
+			  			<b>
+			  			<label style="font-size:20px">&nbsp;<c:out value="${team.getTeamName()}"/></label></b>
+		  				</div>
+		  			</c:forEach>
+			</div><br>	
+			<form method="get" action="CreateTeam">
+				<button class="btn btn-lg btn-primary pull-left" name="idSession" value="${idSession}" type="submit">Créer une nouvelle équipe</button>
+			</form><br><br><br>
+			<a href="ManageSessions"><button class="btn btn-lg btn-primary pull-left" type="submit">Revenir aux sessions</button></a>											
+		</div>
+	</div>
+</t:main>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+	
+<mapper namespace="fr.eseo.ld.proseboard.mybatis.mappers.BillMapper">
+	
+	
+        <resultMap type="Bill" id="BillResult">
+	
+                <id property="idBill" column="id_bill" />
+	
+                <result property="idUserTransmitter" column="id_user_transmitter" />
+	
+                <result property="idUserReceiver" column="id_user_receiver" />
+	
+                <result property="subject" column="subject" />
+	
+                <result property="amount" column="amount" />
+	
+                <result property="comments" column="comments" />
+	
+                <result property="date" column="date" />                
+	
+        </resultMap>
+	
+        
+	
+        <select id="getBillsForUserId" resultMap="BillResult" parameterType="long">
+	
+                SELECT * FROM bill WHERE id_user_receiver = #{userId}
+	
+        </select>
+	
+        
+	
+        <select id="getAllBills" resultMap="BillResult" parameterType="long">
+	
+                SELECT * FROM bill 
+	
+        </select>
+	
+        
+	
+        <insert id="insert" parameterType="Bill" useGeneratedKeys="true" keyProperty="id">
+	
+                INSERT INTO bill(id_user_transmitter, id_user_receiver, subject, amount, comments, date)
+	
+                VALUES(#{idUserTransmitter}, #{idUserReceiver}, #{subject}, #{amount}, #{comments}, #{date})
+	
+        </insert>
+	
+        
+	
+        <delete id="delete" parameterType="long">
+	
+                DELETE FROM bill WHERE id_bill = #{billId}
+	
+        </delete>
+	
+        
+	
+        <select id="getBillById" resultMap="BillResult" parameterType="long">
+	
+                SELECT * FROM bill WHERE id_bill = #{billId}
+	
+        </select>
+	
+        
+	
+</mapper>
